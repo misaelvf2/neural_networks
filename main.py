@@ -102,26 +102,29 @@ def main(dataset, hidden_layers, num_nodes, learning_rate, epochs):
         # my_model.report_classifications()
 
     # Test; run 5 experiments in total
-    # testing_errors = []
-    # for model, test_set in zip(trained_models, test_sets):
-    #     print("\nTesting: ")
-    #     testing_data = test_set.iloc[:, 1:-1].to_numpy().T
-    #     testing_labels = test_set.iloc[:, -1:].to_numpy().T
-    #     if modality == 'binary':
-    #         model.test(testing_data, testing_labels)
-    #     elif modality == 'multi':
-    #         model.multi_test(testing_data, testing_labels)
-    #     elif modality == 'regression':
-    #         model.multi_regression()
-    #     testing_errors.append(model.get_testing_error())
+    testing_errors = []
+    for model, test_set in zip(trained_models, test_sets):
+        print("\nTesting: ")
+        testing_data = test_set.iloc[:, 1:-1].to_numpy().T
+        testing_labels = test_set.iloc[:, -1:].to_numpy().T
+        if modality == 'binary':
+            model.test(testing_data, testing_labels)
+        elif modality == 'multi':
+            model.multi_test(testing_data, testing_labels)
+        elif modality == 'regression':
+            model.regression_test(testing_data, testing_labels)
+        if modality == 'regression':
+            testing_errors.append(model.get_testing_mse())
+        else:
+            testing_errors.append(model.get_testing_error())
         # model.report_classifications()
 
     # Report average results
-    # average_training_error = sum(training_errors) / len(training_errors)
-    # average_testing_error = sum(testing_errors) / len(testing_errors)
-    # print("\nSummary:")
-    # print(f"Average training error: {average_training_error}")
-    # print(f"Average testing error: {average_testing_error}")
+    average_training_error = sum(training_errors) / len(training_errors)
+    average_testing_error = sum(testing_errors) / len(testing_errors)
+    print("\nSummary:")
+    print(f"Average training error: {average_training_error}")
+    print(f"Average testing error: {average_testing_error}")
 
 
-main('machine', 2, [20, 15], 0.001, 5000)
+main('forest_fires', 2, [3, 2], 0.06, 175)

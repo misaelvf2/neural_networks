@@ -50,6 +50,7 @@ class MultiLayerNN:
             'error': 0.0,
             'mse': 0.0,
         }
+        self.testing_errors = []
 
     def train(self):
         num_examples = self.data.shape[1]
@@ -231,9 +232,67 @@ class MultiLayerNN:
         self.plot_error()
         self.update_regression_error()
 
-    def test(self, data):
+    def test(self, data, labels):
+        self.activations[0] = data
+        for i in range(self.hidden_layers + 1):
+            self.weighted_sums[i] = np.dot(self.weights[i], self.activations[i]) + self.biases[i]
+            self.activations[i + 1] = 1 / (1 + np.exp(-self.weighted_sums[i]))
 
+        classifier = np.vectorize(lambda x: 1 if x >= 0.5 else 0)
+        self.classifications = classifier(self.activations[-1])
+        results = self.classifications == labels
+        self.testing_stats['correct'] = np.count_nonzero(results == True)
+        self.testing_stats['incorrect'] = np.count_nonzero(results == False)
+        self.testing_stats['total'] = self.testing_stats['correct'] + self.testing_stats['incorrect']
+        accuracy = self.testing_stats['correct'] / self.testing_stats['total']
+        self.testing_stats['error'] = 1 - accuracy
+        self.testing_errors.append(1 - accuracy)
 
+    def multi_test(self, data, labels):
+        self.activations[0] = data
+        for i in range(self.hidden_layers + 1):
+            self.weighted_sums[i] = np.dot(self.weights[i], self.activations[i]) + self.biases[i]
+            if i == self.hidden_layers:
+                self.activations[i + 1] = 1 / (1 + np.exp(-self.weighted_sums[i]))
+            else:
+                self.activations[i + 1] = 1 / (1 + np.exp(-self.weighted_sums[i]))
+        fake_labels = [_ for _ in range(len(self.classes))]
+        actual_labels = {k:v for (k, v) in zip(fake_labels, self.classes)}
+        o = self.activations[-1].T
+        classifications = []
+        for example in o:
+            label, max_value = None, -np.inf
+            for i, value in enumerate(example):
+                if value > max_value:
+                    max_value = value
+                    label = actual_labels[i]
+            classifications.append(label)
+        self.classifications = classifications
+        results = self.classifications == labels
+        self.testing_stats['correct'] = np.count_nonzero(results == True)
+        self.testing_stats['incorrect'] = np.count_nonzero(results == False)
+        self.testing_stats['total'] = self.testing_stats['correct'] + self.testing_stats['incorrect']
+        accuracy = self.testing_stats['correct'] / self.testing_stats['total']
+        self.testing_stats['error'] = 1 - accuracy
+        self.testing_errors.append(1 - accuracy)
+
+    def regression_test(self, data, labels):
+        self.activations[0] = data
+        for i in range(self.hidden_layers + 1):
+            self.weighted_sums[i] = np.dot(self.weights[i], self.activations[i]) + self.biases[i]
+            if i == self.hidden_layers:
+                self.activations[i + 1] = self.weighted_sums[i]
+            else:
+                self.activations[i + 1] = 1 / (1 + np.exp(-self.weighted_sums[i]))
+        squared_diffs = np.power(np.abs(self.activations[-1] - labels), 2)
+        results = np.abs(self.activations[-1] - labels) <= 10.0
+        self.testing_stats['correct'] = np.count_nonzero(results == True)
+        self.testing_stats['incorrect'] = np.count_nonzero(results == False)
+        self.testing_stats['total'] = self.testing_stats['correct'] + self.testing_stats['incorrect']
+        accuracy = self.testing_stats['correct'] / self.testing_stats['total']
+        self.testing_stats['error'] = 1 - accuracy
+        self.testing_stats['mse'] = np.divide(np.sum(squared_diffs), self.testing_stats['total'])
+        self.testing_errors.append(self.testing_stats['mse'])
 
     def report_classifications(self):
         print(self.classifications)
@@ -243,3 +302,9 @@ class MultiLayerNN:
 
     def get_training_mse(self):
         return self.training_stats['mse']
+
+    def get_testing_error(self):
+        return self.testing_stats['error']
+
+    def get_testing_mse(self):
+        return self.testing_stats['mse']
