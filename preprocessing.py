@@ -71,11 +71,11 @@ def process_abalone():
     """
     df = pd.read_csv("data/abalone.data", header=None)
     df.columns = ['Sex', 'Length', 'Diameter', 'Height', 'Whole_weight', 'Shucked_weight', 'Viscera_weight',
-                  'Shell_weight', 'Class']
+                  'Shell_weight', 'class']
     df['Sex'] = df['Sex'].apply(convert_abalone_to_numerical)
     normalized_df = (df.iloc[:, :-1] - df.iloc[:, :-1].mean()) / df.iloc[:, :-1].std()
     # normalized_df.insert(0, 'Sex', df['Sex'])
-    normalized_df.insert(len(df.columns) - 1, 'Class', df['Class'])
+    normalized_df.insert(len(df.columns) - 1, 'class', df['class'])
     normalized_df = normalized_df.sample(frac=1)
     return normalized_df
 
@@ -100,12 +100,12 @@ def process_machine():
     """
     df = pd.read_csv("data/machine.data", header=None)
     df.columns = ['Vendor', 'Id', 'MYCT', 'MMIN', 'MMAX', 'CACH', 'CHMIN',
-                  'CHMAX', 'Class', 'ERP']
+                  'CHMAX', 'class', 'ERP']
     df = df.drop(columns=['Vendor', 'Id', 'ERP'])
     df = df[['MYCT', 'MMIN', 'MMAX', 'CACH', 'CHMIN',
-                  'CHMAX', 'Class']]
+                  'CHMAX', 'class']]
     normalized_df = (df.iloc[:, :-1] - df.iloc[:, :-1].mean()) / df.iloc[:, :-1].std()
-    normalized_df.insert(len(df.columns) - 1, 'Class', df['Class'])
+    normalized_df.insert(len(df.columns) - 1, 'class', df['class'])
     normalized_df = normalized_df.sample(frac=1)
     return normalized_df
 
@@ -117,11 +117,11 @@ def process_forest_fires():
     """
     df = pd.read_csv("data/forestfires.csv", header=None)
     df.columns = ['X', 'Y', 'Month', 'Day', 'FFMC', 'DMC', 'DC', 'ISI', 'Temp',
-                  'RH', 'Wind', 'Rain', 'Class']
+                  'RH', 'Wind', 'Rain', 'class']
     df['Month'] = df['Month'].apply(change_month_to_number)
     df['Day'] = df['Day'].apply(change_day_to_number)
     normalized_df = (df.iloc[:, :-1] - df.iloc[:, :-1].mean()) / df.iloc[:, :-1].std()
-    normalized_df.insert(len(df.columns) - 1, 'Class', df['Class'])
+    normalized_df.insert(len(df.columns) - 1, 'class', df['class'])
     normalized_df = normalized_df.sample(frac=1)
     return normalized_df
 
