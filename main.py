@@ -4,45 +4,16 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import KFold
 import numpy as np
 
-# df = preprocessing.process_breast_cancer_data()
-#
-# data = df.iloc[:, 1:-1].to_numpy().T
-# raw_data = df
-# labels = df.iloc[:, -1:].to_numpy().T
-# classes = [0, 1]
-# hidden_layers = 2
-# num_nodes = [data.shape[0], 6, 3, 1]
-# learning_rate = 1.5
-# epochs = 250
-# my_model = MultiLayerNN(data, raw_data, labels, classes, hidden_layers, num_nodes, learning_rate, epochs)
-#
-# my_model.train()
-# print(my_model.get_error())
-
-# df = preprocessing.process_glass_data()
-# data = df.iloc[:, 1:-1].to_numpy().T
-# raw_data = df
-# labels = df.iloc[:, -1:].to_numpy().T
-# classes = sorted(df['class'].unique())
-# hidden_layers = 2
-# num_nodes = [data.shape[0], 9, 5, len(classes)]
-# learning_rate = 0.3
-# epochs = 1000
-# my_model = MultiLayerNN(data, raw_data, labels, classes, hidden_layers, num_nodes, learning_rate, epochs)
-# my_model.multi_train()
-
-# df = preprocessing.process_forest_fires()
-# data = df.iloc[:, 1:-1].to_numpy().T
-# raw_data = df
-# labels = df.iloc[:, -1:].to_numpy().T
-# hidden_layers = 2
-# num_nodes = [data.shape[0], 20, 20, 1] # 10, 20, 1 for machine! 15, 20 for forest fires
-# learning_rate = 0.01 # 0.001 for machine!!!, 0.006 for forest fires
-# epochs = 10000 # 10000 for machine!
-# my_model = MultiLayerNN(data, raw_data, labels, None, hidden_layers, num_nodes, learning_rate, epochs)
-# my_model.regression()
-
 def main(dataset, hidden_layers, num_nodes, learning_rate, epochs):
+    """
+    Main program
+    :param dataset: Str
+    :param hidden_layers: Int
+    :param num_nodes: List
+    :param learning_rate: Float
+    :param epochs: Int
+    :return: None
+    """
     if dataset == 'breast':
         df = preprocessing.process_breast_cancer_data()
         modality = 'binary'
@@ -99,7 +70,7 @@ def main(dataset, hidden_layers, num_nodes, learning_rate, epochs):
         else:
             training_errors.append(my_model.get_training_error())
         my_model.plot_error()
-        # my_model.report_classifications()
+        my_model.report_classifications()
 
     # Test; run 5 experiments in total
     testing_errors = []
@@ -117,7 +88,7 @@ def main(dataset, hidden_layers, num_nodes, learning_rate, epochs):
             testing_errors.append(model.get_testing_mse())
         else:
             testing_errors.append(model.get_testing_error())
-        # model.report_classifications()
+        model.report_classifications()
 
     # Report average results
     average_training_error = sum(training_errors) / len(training_errors)
@@ -127,4 +98,10 @@ def main(dataset, hidden_layers, num_nodes, learning_rate, epochs):
     print(f"Average testing error: {average_testing_error}")
 
 
-main('forest_fires', 2, [3, 2], 0.06, 175)
+main('glass', 0, [], 0.1, 300)
+# main('glass', 1, [12], 0.6, 1650)
+# main('glass', 2, [10, 4], 0.5, 3500)
+
+# main('abalone', 0, [], 0.3, 250)
+# main('abalone', 1, [4], 0.2, 750)
+# main('abalone', 2, [4, 2], 0.3, 2000)

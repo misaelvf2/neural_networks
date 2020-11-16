@@ -3,7 +3,21 @@ import matplotlib.pyplot as plt
 
 
 class MultiLayerNN:
+    """
+    Class implementing feedforward neural networks with backpropagation algorithm implemented as batch gradient descent
+    """
     def __init__(self, data, raw_data, labels, classes, hidden_layers, num_nodes, learning_rate, epochs):
+        """
+        Initializes model
+        :param data: np.ndarray
+        :param raw_data: DataFrame
+        :param labels: np.ndarray
+        :param classes: List
+        :param hidden_layers: Int
+        :param num_nodes: List
+        :param learning_rate: Float
+        :param epochs: Int
+        """
         self.data = data
         self.raw_data = raw_data
         self.labels = labels
@@ -53,6 +67,10 @@ class MultiLayerNN:
         self.testing_errors = []
 
     def train(self):
+        """
+        Trains neural network for 2-class classification problems with backpropagation.
+        :return: None
+        """
         num_examples = self.data.shape[1]
 
         # Initialize weights and biases
@@ -86,18 +104,22 @@ class MultiLayerNN:
                 self.weights[i] = self.weights[i] - self.learning_rate * self.weight_derivatives[i]
                 self.biases[i] = self.biases[i] - self.learning_rate * self.bias_derivatives[i]
 
-                self.update_error()
+            self.update_error()
         self.plot_error()
 
     def initialize_multiclass_labels(self):
         """
-        Separates out class labels in case of multiclass problems
+        Separates out class labels in case of multiclass classification
         :return: None
         """
         for i, cls in enumerate(self.classes):
             self.multicls_labels[i] = np.where(self.raw_data['class'] == cls, 1, 0)
 
     def update_error(self):
+        """
+        Updates training error as model is trained for 2-class classification
+        :return: None
+        """
         classifier = np.vectorize(lambda x: 1 if x >= 0.5 else 0)
         self.classifications = classifier(self.activations[-1])
         results = self.classifications == self.labels
@@ -109,6 +131,10 @@ class MultiLayerNN:
         self.errors.append(1 - accuracy)
 
     def update_multi_error(self):
+        """
+        Updates training error as model is trained for multi-class classification
+        :return: None
+        """
         results = self.classifications == self.labels
         self.training_stats['correct'] = np.count_nonzero(results == True)
         self.training_stats['incorrect'] = np.count_nonzero(results == False)
@@ -118,6 +144,10 @@ class MultiLayerNN:
         self.errors.append(1 - accuracy)
 
     def update_regression_error(self):
+        """
+        Updates training error as model is trained for regression
+        :return:
+        """
         squared_diffs = np.power(np.abs(self.activations[-1] - self.labels), 2)
         results = np.abs(self.activations[-1] - self.labels) <= 10.0
         self.training_stats['correct'] = np.count_nonzero(results == True)
@@ -128,7 +158,12 @@ class MultiLayerNN:
         self.training_stats['mse'] = np.divide(np.sum(squared_diffs), self.labels.shape[1])
         self.errors.append(self.training_stats['mse'])
 
-    def multi_classify(self, data, output):
+    def multi_classify(self, output):
+        """
+        Classifies training examples on multi-class classification
+        :param output: np.ndarray
+        :return: None
+        """
         fake_labels = [_ for _ in range(len(self.classes))]
         actual_labels = {k:v for (k, v) in zip(fake_labels, self.classes)}
         o = output.T
@@ -143,11 +178,19 @@ class MultiLayerNN:
         self.classifications = classifications
 
     def plot_error(self):
+        """
+        Plots error with respect to epochs
+        :return:
+        """
         plt.plot(self.errors)
         plt.ylabel('Error')
         plt.savefig("error.png")
 
     def multi_train(self):
+        """
+        Trains neural network for multi-class classification problems with backpropagation.
+        :return: None
+        """
         self.initialize_multiclass_labels()
         num_examples = self.data.shape[1]
 
@@ -186,12 +229,16 @@ class MultiLayerNN:
                     self.weights[i] = self.weights[i] - self.learning_rate * self.weight_derivatives[i]
                     self.biases[i] = self.biases[i] - self.learning_rate * self.bias_derivatives[i]
 
-                self.multi_classify(self.data, self.activations[-1])
-                self.update_multi_error()
-        self.multi_classify(self.data, self.activations[-1])
+            self.multi_classify(self.activations[-1])
+            self.update_multi_error()
+        self.multi_classify(self.activations[-1])
         self.plot_error()
 
     def regression(self):
+        """
+        Trains neural network for regression problems with backpropagation.
+        :return:
+        """
         num_examples = self.data.shape[1]
 
         # Initialize weights and biases
@@ -228,11 +275,17 @@ class MultiLayerNN:
                 self.weights[i] = self.weights[i] - self.learning_rate * self.weight_derivatives[i]
                 self.biases[i] = self.biases[i] - self.learning_rate * self.bias_derivatives[i]
 
-                self.update_regression_error()
+            self.update_regression_error()
         self.plot_error()
         self.update_regression_error()
 
     def test(self, data, labels):
+        """
+        Tests given sample for 2-class classification problems
+        :param data: np.ndarray
+        :param labels: np.ndarray
+        :return: None
+        """
         self.activations[0] = data
         for i in range(self.hidden_layers + 1):
             self.weighted_sums[i] = np.dot(self.weights[i], self.activations[i]) + self.biases[i]
@@ -249,6 +302,12 @@ class MultiLayerNN:
         self.testing_errors.append(1 - accuracy)
 
     def multi_test(self, data, labels):
+        """
+        Tests given sample for multiclass classification problems
+        :param data: np.ndarray
+        :param labels: np.ndarray
+        :return: None
+        """
         self.activations[0] = data
         for i in range(self.hidden_layers + 1):
             self.weighted_sums[i] = np.dot(self.weights[i], self.activations[i]) + self.biases[i]
@@ -277,6 +336,12 @@ class MultiLayerNN:
         self.testing_errors.append(1 - accuracy)
 
     def regression_test(self, data, labels):
+        """
+        Tests given sample for regression problems
+        :param data: np.ndarray
+        :param labels: np.ndarray
+        :return: None
+        """
         self.activations[0] = data
         for i in range(self.hidden_layers + 1):
             self.weighted_sums[i] = np.dot(self.weights[i], self.activations[i]) + self.biases[i]
@@ -295,16 +360,36 @@ class MultiLayerNN:
         self.testing_errors.append(self.testing_stats['mse'])
 
     def report_classifications(self):
+        """
+        Prints model outputs
+        :return: None
+        """
         print(self.classifications)
 
     def get_training_error(self):
+        """
+        Returns training error
+        :return: Float
+        """
         return self.training_stats['error']
 
     def get_training_mse(self):
+        """
+        Returns training mean squared error
+        :return: Float
+        """
         return self.training_stats['mse']
 
     def get_testing_error(self):
+        """
+        Returns testing error
+        :return: Float
+        """
         return self.testing_stats['error']
 
     def get_testing_mse(self):
+        """
+        Returns testing mean squared error
+        :return: Float
+        """
         return self.testing_stats['mse']
